@@ -1,10 +1,10 @@
 FROM node:slim AS build
 
-# Create app directory
-WORKDIR /usr/src/app
 
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+# Add non-root user
+RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
+
+WORKDIR /app
 
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
@@ -21,12 +21,12 @@ RUN npm run build
 
 FROM node:slim
 
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+# Add non-root user
+RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
 
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/package*.json ./
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --chown=appuser:appgroup --from=build /app/package*.json ./
+COPY --chown=appuser:appgroup --from=build /app/dist ./dist
 
 RUN npm i -g serve
 

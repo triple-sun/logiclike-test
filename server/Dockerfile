@@ -23,7 +23,7 @@ RUN npm run build
 # Production Stage
 FROM node:slim
 
-RUN apt-get update && apt-get install -y openssl
+RUN apt-get update && apt-get install -y openssl wget
 
 # Add non-root user
 RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup

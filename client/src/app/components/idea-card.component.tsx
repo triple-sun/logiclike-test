@@ -1,5 +1,5 @@
 import { CheckCircleOutlined } from "@ant-design/icons";
-import { Button, Card, CardProps } from "antd";
+import { Button, Card } from "antd";
 import { NotificationInstance } from "antd/es/notification/interface";
 import axios from "axios";
 import { debounce } from "lodash";
@@ -12,12 +12,12 @@ import { serializeAxiosError } from "../../lib/utils/common.utils";
 
 type Props = {
   idea: Idea;
-  cardProps: CardProps;
   messageApi: NotificationInstance;
 };
 
-export const IdeaCard = ({ idea, cardProps, messageApi }: Props) => {
+export const IdeaCard = ({ idea, messageApi }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [canVote, setCanVote] = useState<boolean>(idea.canVote);
 
   const voteForIdea = async () =>
     await axios.post<ApiResponse<Idea>>(
@@ -26,8 +26,8 @@ export const IdeaCard = ({ idea, cardProps, messageApi }: Props) => {
 
   const debouncedSave = debounce(() => {
     voteForIdea()
-      .then(({ data: { data } }) => {
-        idea = data;
+      .then(() => {
+        setCanVote(false);
       })
       .catch((err) => {
         const error = serializeAxiosError(err);
@@ -47,29 +47,47 @@ export const IdeaCard = ({ idea, cardProps, messageApi }: Props) => {
         //title={item.label}
         variant="borderless"
         actions={[
-          <Button
-            loading={isLoading}
-            variant="text"
-            color="orange"
-            onClick={() => {
-              setIsLoading(true);
+          canVote ? (
+            <div style={{ minHeight: 50, width: "100%", marginTop: "1vh" }}>
+              <Button
+                block
+                size="large"
+                loading={isLoading}
+                variant="text"
+                color="orange"
+                onClick={() => {
+                  setIsLoading(true);
 
-              debouncedSave();
-            }}
-            style={{
-              width: "45%",
-              borderRadius: "9999px",
-            }}
-          >
-            <CheckCircleOutlined /> Голосовать
-          </Button>,
+                  debouncedSave();
+                }}
+                style={{
+                  width: "45%",
+                  borderRadius: "9999px",
+                }}
+              >
+                <CheckCircleOutlined />
+                <br /> Голосовать
+              </Button>
+            </div>
+          ) : (
+            <div
+              style={{
+                minHeight: 50,
+                width: "100%",
+                marginTop: "1vh",
+                cursor: "not-allowed",         
+              }}
+            >
+              <CheckCircleOutlined />
+              <br /> Голос учтен
+            </div>
+          ),
         ]}
       >
         <Card.Meta
           style={{ color: "white" }}
           title={<>{idea.title} </>}
           description={idea.text}
-          {...cardProps}
         />
       </Card>
     </>

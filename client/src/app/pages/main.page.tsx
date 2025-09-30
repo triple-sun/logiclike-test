@@ -1,6 +1,12 @@
 import { Card, Col, Empty, Row } from "antd";
 import { NotificationInstance } from "antd/es/notification/interface";
-import { CSSProperties, ReactNode, useEffect, useState } from "react";
+import {
+  CSSProperties,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import { API_BASE_URL } from "../../lib/const/const";
 import { SerializedError } from "../../lib/interfaces/error.interfaces";
@@ -18,6 +24,16 @@ export const MainPage = ({
   const [ideas, setIdeas] = useState<Idea[]>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<SerializedError>();
+
+  const getIdeas = async () =>
+    await api.get<ApiResponse<Idea[]>>(API_BASE_URL + "/ideas/");
+
+  const getAndSetIdeas = useCallback(() => {
+    getIdeas()
+      .then(({ data: { data } }) => setIdeas(data))
+      .catch((err) => setError(serializeAxiosError(err)))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   if (error) {
     messageApi.error({
@@ -38,16 +54,10 @@ export const MainPage = ({
   };
 
   useEffect(() => {
-    const fetchIdeas = async () =>
-      await api.get<ApiResponse<Idea[]>>(API_BASE_URL + "/ideas/");
-
     setIsLoading(true);
 
-    fetchIdeas()
-      .then(({ data: { data } }) => setIdeas(data))
-      .catch((err) => setError(serializeAxiosError(err)))
-      .finally(() => setIsLoading(false));
-  }, []);
+    getAndSetIdeas();
+  }, [getAndSetIdeas]);
 
   return (
     <Row
@@ -57,11 +67,7 @@ export const MainPage = ({
       {ideas && ideas.length > 0 ? (
         ideas?.map((idea): ReactNode | null => (
           <Col span={8} key={idea.id}>
-            <IdeaCard
-              idea={idea}
-              cardProps={{ style: cardStyle }}
-              messageApi={messageApi}
-            />
+            <IdeaCard idea={idea} messageApi={messageApi} />
           </Col>
         ))
       ) : (

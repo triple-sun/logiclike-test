@@ -2,9 +2,7 @@ import express from "express";
 
 import { notFoundHandlerMiddleware } from "./middleware/not-found-handler.middleware";
 import rTracer from "cls-rtracer";
-import { LoggerService } from "./services/logger.service";
 import { setupSecurityHeaders } from "./config/security.config";
-import { ErrorMonitoringService } from "./services/error-monitoring.service";
 import cors from "cors";
 import { compressionMiddleware } from "./middleware/compression.middleware";
 import { requestLoggerMiddleware } from "./middleware/request-logger.middleware";
@@ -15,8 +13,6 @@ import { errorHandlerMiddleware } from "./middleware/error-handler.middleware";
 import { ideaRouter } from "./routes/idea.routes";
 
 const app = express();
-// Мониторинг ошибок приложения
-ErrorMonitoringService.getInstance(new LoggerService("App"));
 // Безопасность
 setupSecurityHeaders(app as express.Express);
 app.use(cors({ origin: ENV.FRONTEND_URL }));

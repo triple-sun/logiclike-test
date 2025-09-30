@@ -9,7 +9,8 @@ services:
       - "${VITE_PORT}:${VITE_PORT}"
     restart: always
     depends_on:
-      - logiclike_server
+      logiclike_server:
+        condition: service_healthy
     networks:
       - logiclike-test
 

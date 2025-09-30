@@ -21,9 +21,12 @@ export class IdeaService {
     return idea;
   }
 
-  async findMany(where?: Prisma.IdeaWhereInput) {
-    return await this.prisma.idea.findMany({
+  async findMany(voterIp: string, where?: Prisma.IdeaWhereInput) {
+    const ideas = await this.prisma.idea.findMany({
       where,
+      orderBy: {
+        votes: { _count: "desc" },
+      },
       select: {
         id: true,
         title: true,
@@ -35,6 +38,11 @@ export class IdeaService {
         },
       },
     });
+
+    return ideas.map((idea) => ({
+      ...idea,
+      canVote: !idea.votes.some((v) => v.voter.ip === voterIp),
+    }));
   }
 
   async addVote(ideaId: string, voterIp: string) {
@@ -71,6 +79,6 @@ export class IdeaService {
       `Записан голос от [${voterIp}] за идею [${idea.id}]:[${idea.title}]`
     );
 
-    return created;
+    return { ...created, canVote: false };
   }
 }

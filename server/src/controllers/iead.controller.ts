@@ -11,7 +11,9 @@ export class IdeaController extends BaseController {
 
   getAll = async (req: Request, res: Response, next: NextFunction) => {
     await this.handleRequest(req, res, next, async () => {
-      return await this.ideaService.findMany();
+      const voterIp = this.getIp(req);
+
+      return await this.ideaService.findMany(voterIp);
     });
   };
 
@@ -21,19 +23,21 @@ export class IdeaController extends BaseController {
     next: NextFunction
   ): Promise<void> => {
     await this.handleRequest(req, res, next, async () => {
-      const ip = Array.isArray(req.headers["x-forwarded-for"])
-        ? req.headers["x-forwarded-for"][0]
-        : req.headers["x-forwarded-for"] || req.ip || req.socket.remoteAddress;
+      const voterIp = this.getIp(req);
 
-      if (!ip) {
-        throw new AppError(
-          `IP не найден в запросе`,
-          400,
-          ErrorCode.BAD_REQUEST
-        );
-      }
-
-      return await this.ideaService.addVote(req.params.id, ip);
+      return await this.ideaService.addVote(req.params.id, voterIp);
     });
   };
+
+  private getIp(req: Request) {
+    const ip = Array.isArray(req.headers["x-forwarded-for"])
+      ? req.headers["x-forwarded-for"][0]
+      : req.headers["x-forwarded-for"] || req.ip || req.socket.remoteAddress;
+
+    if (!ip) {
+      throw new AppError(`IP не найден в запросе`, 400, ErrorCode.BAD_REQUEST);
+    }
+
+    return ip;
+  }
 }

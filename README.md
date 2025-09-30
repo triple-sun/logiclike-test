@@ -27,3 +27,5 @@ npm run start
 ```bash
 npm run seed
 ```
+
+### Фронтенд будет доступен по адресу localhost:${VITE_PORT}
