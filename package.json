@@ -1,0 +1,12 @@
+{
+  "name": "logiclike-test",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "seed": "docker exec -it logiclike_server sh -c \"npm run seed\"",
+    "env:create": "cp .env.example .env",
+    "start": "cp .env client/.env && docker compose up --build"
+  }
+}

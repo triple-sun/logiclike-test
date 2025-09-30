@@ -1,0 +1,101 @@
+services:
+  logiclike_client:
+    container_name: logiclike_client
+    env_file: .env
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "${VITE_PORT}:${VITE_PORT}"
+    restart: always
+    depends_on:
+      - logiclike_server
+    networks:
+      - logiclike-test
+
+  logiclike_server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    env_file: .env
+    container_name: logiclike_server
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      logiclike_db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${API_PORT}/health",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    networks:
+      - logiclike-test
+    volumes:
+      - ./logs:/app/logs
+    tmpfs:
+      - /tmp
+      - /run
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  logiclike_db:
+    image: postgres:14-alpine
+    container_name: logiclike_db_dev
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      PGDATA: /var/lib/postgresql/data/${DB_NAME}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    networks:
+      - logiclike-test
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  logiclike-test:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+    driver_opts:
+      encrypt: "true"

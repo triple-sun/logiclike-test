@@ -1,0 +1,8 @@
+services:
+  logiclike-test-client:
+    container_name: logiclike-test-client
+    build:
+      context: .
+    ports:
+      - "127.0.0.1:${VITE_PORT}:${VITE_PORT}"
+    restart: always

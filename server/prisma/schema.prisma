@@ -1,0 +1,45 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "linux-arm64-openssl-3.0.x", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Idea {
+  id String @id @default(uuid())
+
+  title String
+  text  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  votes VoteEvent[]
+}
+
+model Voter {
+  id String @id @default(uuid())
+
+  ip String @unique()
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  votes VoteEvent[]
+}
+
+model VoteEvent {
+  id String @id @default(uuid())
+
+  voter   Voter  @relation(fields: [voterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  voterId String
+
+  idea   Idea   @relation(fields: [ideaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ideaId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

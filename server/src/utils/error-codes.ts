@@ -1,0 +1,26 @@
+export enum ErrorCode {
+  // Ошибки запросов
+  BAD_REQUEST = "ERR_1001",
+  // Ошибки валидации (3xxx)
+  INVALID_INPUT = "ERR_3001",
+  MISSING_REQUIRED_FIELD = "ERR_3002",
+  INVALID_EMAIL = "ERR_3003",
+  INVALID_PASSWORD = "ERR_3004",
+  INVALID_REQUEST = "ERR_3005",
+  VALIDATION_ERROR = "ERR_3006",
+
+  // Ошибки ресурсов (4xxx)
+  NOT_FOUND = "ERR_4001",
+  ALREADY_EXISTS = "ERR_4002",
+  CONFLICT = "ERR_4003",
+
+  // Ошибки БД (5xxx)
+  DB_ERROR = "ERR_5001",
+  DB_CONNECTION_ERROR = "ERR_5002",
+  DB_QUERY_ERROR = "ERR_5003",
+
+  // Серверные ошибки (6xxx)
+  INTERNAL_SERVER_ERROR = "ERR_6001",
+  SERVICE_UNAVAILABLE = "ERR_6002",
+  EXTERNAL_SERVICE_ERROR = "ERR_6003",
+}
