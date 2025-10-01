@@ -6,6 +6,7 @@
 
 ```bash
 git clone https://github.com/triple-sun/logiclike-test.git
+cd logiclike-test
 ```
 
 ### Заполнить переменные окружения
